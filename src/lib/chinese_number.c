@@ -1,6 +1,7 @@
 #include "chinese_number.h"
 
 #include <float.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -379,7 +380,7 @@ static uint8_t parse_tokens(const NumberToken* tokens, size_t token_count, Parse
     DigitState digit_state = DIGIT_STATE_NONE;
     MultStack stack;
 
-    if (!result || !mult_stack_init(&stack) || !result_init(result)) {
+    if (!mult_stack_init(&stack) || !result_init(result)) {
         mult_stack_free(&stack); // Free stack if init failed after result alloc
         return 1;
     }
@@ -911,21 +912,20 @@ void result_to_sci(const ParseResult* result, ScientificNotation* sciOut) {
 char* sciToStr(const ScientificNotation* sci) {
     const bool neg = sci->fraction < 0;
     const uint32_t fracLen = sci->fractionLen + neg;
+    char *str, *cache, *ptr;
 
     switch (sci->type) {
     case I32:
     case I64:
-        char* str = malloc((fracLen + 1) * sizeof(char));
+        str = malloc((fracLen + 1) * sizeof(char));
         *str = '\0';
-        snprintf(str, fracLen + 1, "%lld", sci->fraction);
+        snprintf(str, fracLen + 1, "%" PRId64, sci->fraction);
         return str;
     case F64:
         // Convert digits to string buffer
-        char* cache = malloc((sci->fractionLen + 1) * sizeof(char));
+        cache = malloc((sci->fractionLen + 1) * sizeof(char));
         *cache = '\0';
-        snprintf(cache, sci->fractionLen + 1, "%lld", neg ? -sci->fraction : sci->fraction);
-        // Write sign
-        char* ptr;
+        snprintf(cache, sci->fractionLen + 1, "%" PRId64, neg ? -sci->fraction : sci->fraction);
 
         // Format depending on exponent vs. digits length
         if (sci->exp < 0 && -sci->exp == sci->fractionLen) {
@@ -956,7 +956,8 @@ char* sciToStr(const ScientificNotation* sci) {
             int expLen = (int)log10(exp < 0 ? -exp : exp) + 1;
             if (expLen < 2) expLen = 2;
 
-            ptr = str = malloc((neg + extraFrac + sci->fractionLen + 3 + expLen + 1 + (!extraFrac ? 2 : 0)) * sizeof(char));
+            ptr = str = malloc(
+                (neg + extraFrac + sci->fractionLen + 3 + expLen + 1 + (!extraFrac ? 2 : 0)) * sizeof(char));
             if (neg) *ptr++ = '-';
 
             *ptr++ = *cache;
