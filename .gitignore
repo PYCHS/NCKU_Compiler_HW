@@ -30,3 +30,6 @@ main
 .idea/
 *.swp
 *~
+
+# Ignore Claude Code local config
+.claude/
