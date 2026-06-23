@@ -1,6 +1,9 @@
-[submodule "lib/utf8.c"]
+[submodule "HW1/lib/utf8.c"]
+	path = HW1/lib/utf8.c
+	url = https://github.com/zahash/utf8.c
+[submodule "HW2/lib/utf8.c"]
 	path = HW2/lib/utf8.c
 	url = https://github.com/zahash/utf8.c
-[submodule "lib/WJCL"]
+[submodule "HW2/lib/WJCL"]
 	path = HW2/lib/WJCL
 	url = https://github.com/WavJaby/WJCL/
