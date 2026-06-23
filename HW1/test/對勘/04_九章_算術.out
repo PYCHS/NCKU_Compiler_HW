@@ -1,0 +1,240 @@
+﻿1:1: COMMENT 注曰
+1:4: STR_LIT "
+    斯篇專作「九章算術」算理之驗證。
+    考其加減乘除、所餘幾何之法，
+    以驗編譯器於算術運算、變數易值之全功。
+"
+7:1: HERE_ARE 今有
+7:3: NUMBER_LIT 2
+7:4: VAR_TYPE 數
+7:6: SAID 曰
+7:7: NUMBER_LIT 10
+7:9: SAID 曰
+7:10: NUMBER_LIT 3
+7:12: NAME_IT 名之曰
+7:15: IDENT '甲'
+7:18: SAID 曰
+7:19: IDENT '乙'
+8:1: HERE_ARE 今有
+8:3: NUMBER_LIT 2
+8:4: VAR_TYPE 言
+8:6: SAID 曰
+8:7: STR_LIT "今有甲數為"
+8:17: SAID 曰
+8:18: IDENT '甲'
+8:22: PRINT 書之
+9:1: HERE_ARE 今有
+9:3: NUMBER_LIT 2
+9:4: VAR_TYPE 言
+9:6: SAID 曰
+9:7: STR_LIT "又有乙數為"
+9:17: SAID 曰
+9:18: IDENT '乙'
+9:22: PRINT 書之
+11:1: EXP_MATH +
+11:2: IDENT '甲'
+11:5: <-
+11:6: IDENT '乙'
+11:10: NAME_IT 名之曰
+11:13: IDENT '和'
+11:49: COMMENT 注曰
+11:51: STR_LIT " 和 = 乙 + 甲  "
+12:1: HERE_ARE 今有
+12:3: NUMBER_LIT 2
+12:4: VAR_TYPE 言
+12:6: SAID 曰
+12:7: STR_LIT "甲乙相并，厥和乃為"
+12:21: SAID 曰
+12:22: IDENT '和'
+12:26: PRINT 書之
+14:1: EXP_MATH -
+14:2: IDENT '甲'
+14:5: ->
+14:6: IDENT '乙'
+14:10: NAME_IT 名之曰
+14:13: IDENT '差'
+14:49: COMMENT 注曰
+14:51: STR_LIT " 差 = 甲 - 乙  "
+15:1: HERE_ARE 吾有
+15:3: NUMBER_LIT 2
+15:4: VAR_TYPE 言
+15:6: SAID 曰
+15:7: STR_LIT "以乙損甲，其差為"
+15:20: SAID 曰
+15:21: IDENT '差'
+15:25: PRINT 書之
+17:1: EXP_MATH -
+17:2: IDENT '甲'
+17:5: <-
+17:6: IDENT '乙'
+17:10: NAME_IT 名之曰
+17:13: IDENT '反差'
+17:48: COMMENT 注曰
+17:50: STR_LIT " 反差 = 乙 - 甲 "
+18:1: HERE_ARE 吾有
+18:3: NUMBER_LIT 2
+18:4: VAR_TYPE 言
+18:6: SAID 曰
+18:7: STR_LIT "以甲損乙，反得其差為"
+18:22: SAID 曰
+18:23: IDENT '反差'
+18:28: PRINT 書之
+20:1: EXP_MATH *
+20:2: IDENT '甲'
+20:5: ->
+20:6: IDENT '乙'
+20:10: NAME_IT 名之曰
+20:13: IDENT '積'
+20:49: COMMENT 注曰
+20:51: STR_LIT " 積 = 甲 x 乙 "
+21:1: HERE_ARE 吾有
+21:3: NUMBER_LIT 2
+21:4: VAR_TYPE 言
+21:6: SAID 曰
+21:7: STR_LIT "甲乙相乘，步其積為"
+21:21: SAID 曰
+21:22: IDENT '積'
+21:26: PRINT 書之
+23:1: EXP_MATH /
+23:2: IDENT '甲'
+23:5: ->
+23:6: IDENT '乙'
+23:10: NAME_IT 名之曰
+23:13: IDENT '商'
+23:49: COMMENT 注曰
+23:51: STR_LIT " 商 = 甲 ÷ 乙 "
+24:1: EXP_MATH /
+24:2: IDENT '甲'
+24:5: ->
+24:6: IDENT '乙'
+24:10: EXP_MATH_OP %
+24:15: NAME_IT 名之曰
+24:18: IDENT '餘'
+24:44: COMMENT 注曰
+24:46: STR_LIT " 餘 = 甲 % 乙 "
+25:1: HERE_ARE 吾有
+25:3: NUMBER_LIT 4
+25:4: VAR_TYPE 言
+25:6: SAID 曰
+25:7: STR_LIT "以乙除甲，得商"
+25:19: SAID 曰
+25:20: IDENT '商'
+25:24: SAID 曰
+25:25: STR_LIT "，不盡者為"
+25:35: SAID 曰
+25:36: IDENT '餘'
+25:40: PRINT 書之
+27:1: EXP_MATH +
+27:2: IDENT '甲'
+27:5: <-
+27:6: NUMBER_LIT 1
+27:8: PAST 昔之
+27:10: IDENT '甲'
+27:13: TOPIC 者
+27:15: SET 今
+27:16: ITS 其
+27:17: IS_THUS 是矣
+27:46: COMMENT 注曰
+27:48: STR_LIT " 甲 = 1 + 甲 "
+28:1: HERE_ARE 吾有
+28:3: NUMBER_LIT 2
+28:4: VAR_TYPE 言
+28:6: SAID 曰
+28:7: STR_LIT "甲益一算，厥數乃為"
+28:21: SAID 曰
+28:22: IDENT '甲'
+28:26: PRINT 書之
+30:1: EXP_MATH -
+30:2: IDENT '乙'
+30:5: ->
+30:6: NUMBER_LIT 1
+30:8: PAST 昔之
+30:10: IDENT '乙'
+30:13: TOPIC 者
+30:15: SET 今
+30:16: ITS 其
+30:17: IS_THUS 是矣
+30:46: COMMENT 注曰
+30:48: STR_LIT " 乙 = 乙 - 1 "
+31:1: HERE_ARE 吾有
+31:3: NUMBER_LIT 2
+31:4: VAR_TYPE 言
+31:6: SAID 曰
+31:7: STR_LIT "乙損一籌，其數化為"
+31:21: SAID 曰
+31:22: IDENT '乙'
+31:26: PRINT 書之
+33:1: COMMENT 注曰
+33:3: STR_LIT "連加運算與「其」之驗證"
+34:1: EXP_MATH +
+34:2: IDENT '甲'
+34:5: <-
+34:6: IDENT '乙'
+34:10: NAME_IT 名之曰
+34:13: IDENT '丁'
+34:49: COMMENT 注曰
+34:51: STR_LIT " 丁 = 乙 + 甲 (11 + 2 = 13) "
+35:1: EXP_MATH +
+35:2: IDENT '丁'
+35:5: <-
+35:6: NUMBER_LIT 10
+35:8: NAME_IT 名之曰
+35:11: IDENT '戊'
+35:51: COMMENT 注曰
+35:53: STR_LIT " 戊 = 10 + 丁 (10 + 13 = 23) "
+36:1: EXP_MATH +
+36:2: IDENT '甲'
+36:5: <-
+36:6: IDENT '乙'
+36:10: EXP_MATH +
+36:11: ITS 其
+36:12: <-
+36:13: NUMBER_LIT 10
+36:15: NAME_IT 名之曰
+36:18: IDENT '己'
+36:44: COMMENT 注曰
+36:46: STR_LIT " 己 = 10 + (乙 + 甲) (10 + 13 = 23) "
+37:1: HERE_ARE 吾有
+37:3: NUMBER_LIT 6
+37:4: VAR_TYPE 言
+37:6: SAID 曰
+37:7: STR_LIT "今以甲數"
+37:16: SAID 曰
+37:17: IDENT '甲'
+38:5: SAID 曰
+38:6: STR_LIT "，并乙復益十，步之得"
+38:21: SAID 曰
+38:22: IDENT '己'
+39:5: SAID 曰
+39:6: STR_LIT "，與戊同揆，皆為"
+39:19: SAID 曰
+39:20: IDENT '戊'
+39:24: PRINT 書之
+41:1: COMMENT 注曰
+41:3: STR_LIT "一算訖即書之（算畢隨錄）"
+42:1: HERE_ARE 吾有
+42:3: NUMBER_LIT 2
+42:4: VAR_TYPE 言
+42:6: SAID 曰
+42:7: STR_LIT "并甲於乙，其數為"
+42:20: SAID 曰
+42:21: EXP_MATH +
+42:22: IDENT '甲'
+42:25: <-
+42:26: IDENT '乙'
+42:30: PRINT 書之
+42:36: COMMENT 注曰
+42:38: STR_LIT " printf("并甲於乙，其數為 %d\n", 乙 + 甲) "
+43:1: HERE_ARE 吾有
+43:3: NUMBER_LIT 2
+43:4: VAR_TYPE 言
+43:6: SAID 曰
+43:7: STR_LIT "乘甲以乙，其積為"
+43:20: SAID 曰
+43:21: EXP_MATH *
+43:22: IDENT '甲'
+43:25: ->
+43:26: IDENT '乙'
+43:30: PRINT 書之
+43:36: COMMENT 注曰
+43:38: STR_LIT " printf("乘甲以乙，其積為 %d\n", 甲 * 乙) "

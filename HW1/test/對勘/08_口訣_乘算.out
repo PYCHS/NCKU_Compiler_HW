@@ -1,0 +1,97 @@
+﻿1:1: COMMENT 注曰
+1:4: STR_LIT "
+    斯篇專演「九九乘法」之理。
+    考《管子》、《算數書》皆載九九之術，乃算家之樞紐。
+    茲以雙重迴圈與明斷之法，羅列乘算口訣，以驗編譯器之全功。
+"
+7:1: COMMENT 注曰
+7:3: STR_LIT " 甲為乘數，肇始於一，至九乃極 "
+8:1: HERE_IS_A 有
+8:2: VAR_TYPE 數
+8:3: NUMBER_LIT 1
+8:4: NAME_IT 名之曰
+8:7: IDENT '甲'
+9:1: WHILE_TRUE 恆為是
+9:5: IF 若
+9:6: IDENT '甲'
+9:9: EXP_LOGIC >=
+9:12: NUMBER_LIT 10
+9:13: TOPIC 者
+9:14: BREAK 乃止
+9:16: END 也
+10:5: COMMENT 注曰
+10:7: STR_LIT " 乙為被乘數，亦自一始，隨甲流轉 "
+11:5: HERE_IS_A 有
+11:6: VAR_TYPE 數
+11:7: NUMBER_LIT 1
+11:8: NAME_IT 名之曰
+11:11: IDENT '乙'
+12:5: WHILE_TRUE 恆為是
+12:9: IF 若
+12:10: IDENT '乙'
+12:13: EXP_LOGIC >=
+12:16: NUMBER_LIT 10
+12:17: TOPIC 者
+12:18: BREAK 乃止
+12:20: END 也
+13:9: COMMENT 注曰
+13:11: STR_LIT " 步其積：果 = 甲乘乙 "
+14:9: EXP_MATH *
+14:10: IDENT '甲'
+14:13: ->
+14:14: IDENT '乙'
+14:17: NAME_IT 名之曰
+14:20: IDENT '果'
+15:9: COMMENT 注曰
+15:11: STR_LIT " 觀其積：若滿十，逕直書之；若不及十，加『得』字以齊句讀 "
+16:9: IF 若
+16:10: IDENT '果'
+16:13: EXP_LOGIC >=
+16:16: NUMBER_LIT 10
+16:17: TOPIC 者
+16:18: HERE_ARE 吾有
+16:20: NUMBER_LIT 3
+16:21: VAR_TYPE 言
+16:23: SAID 曰
+16:24: IDENT '甲'
+16:27: SAID 曰
+16:28: IDENT '乙'
+16:31: SAID 曰
+16:32: IDENT '果'
+16:35: PRINT 書之
+17:9: ELSE 若非
+17:11: HERE_ARE 吾有
+17:13: NUMBER_LIT 4
+17:14: VAR_TYPE 言
+17:16: SAID 曰
+17:17: IDENT '甲'
+17:20: SAID 曰
+17:21: IDENT '乙'
+17:24: SAID 曰
+17:25: STR_LIT "得"
+17:30: SAID 曰
+17:31: IDENT '果'
+17:34: PRINT 書之
+17:36: END 也
+18:9: EXP_MATH +
+18:10: IDENT '乙'
+18:13: ->
+18:14: NUMBER_LIT 1
+18:16: PAST 昔之
+18:18: IDENT '乙'
+18:21: TOPIC 者
+18:22: SET 今
+18:23: ITS 其
+18:24: IS_THUS 是矣
+19:5: END 云云
+20:5: EXP_MATH +
+20:6: IDENT '甲'
+20:9: ->
+20:10: NUMBER_LIT 1
+20:12: PAST 昔之
+20:14: IDENT '甲'
+20:17: TOPIC 者
+20:18: SET 今
+20:19: ITS 其
+20:20: IS_THUS 是矣
+21:1: END 云云

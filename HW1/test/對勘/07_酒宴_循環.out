@@ -1,0 +1,96 @@
+﻿1:1: COMMENT 注曰
+1:4: STR_LIT "
+    斯篇專演「循環」與「明斷」之法。
+    借馮延巳《長命女》之詞境，
+    以驗「恆為是」、「為是...遍」等迴圈，與吉凶判斷之全功。
+"
+7:1: HERE_ARE 吾有
+7:3: NUMBER_LIT 1
+7:4: VAR_TYPE 言
+7:6: SAID 曰
+7:7: STR_LIT "春日宴。"
+7:16: PRINT 書之
+9:1: HERE_IS_A 有
+9:2: VAR_TYPE 數
+9:3: NUMBER_LIT 3
+9:5: NAME_IT 名之曰
+9:8: IDENT '酒數'
+11:1: COMMENT 注曰
+11:3: STR_LIT " 驗證 恆為是 迴圈：綠酒一杯歌一遍 "
+12:1: WHILE_TRUE 恆為是
+12:5: IF 若
+12:6: IDENT '酒數'
+12:10: EXP_LOGIC ==
+12:12: NUMBER_LIT 0
+12:13: TOPIC 者
+12:14: BREAK 乃止
+12:16: END 也
+14:5: HERE_ARE 吾有
+14:7: NUMBER_LIT 3
+14:8: VAR_TYPE 言
+14:10: SAID 曰
+14:11: STR_LIT "飲綠酒"
+14:19: SAID 曰
+14:20: IDENT '酒數'
+15:9: SAID 曰
+15:10: STR_LIT "杯，高歌一遍。"
+15:22: PRINT 書之
+17:5: EXP_MATH -
+17:6: IDENT '酒數'
+17:10: ->
+17:11: NUMBER_LIT 1
+17:13: PAST 昔之
+17:15: IDENT '酒數'
+17:19: TOPIC 者
+17:21: SET 今
+17:22: ITS 其
+17:23: IS_THUS 是矣
+18:1: END 云云
+20:1: HERE_ARE 吾有
+20:3: NUMBER_LIT 1
+20:4: VAR_TYPE 言
+20:6: SAID 曰
+20:7: STR_LIT "酒闌之際，再拜陳三願。"
+20:23: PRINT 書之
+22:1: COMMENT 注曰
+22:3: STR_LIT " 驗證 為是...遍 計次迴圈 "
+23:1: FOR 為是
+23:4: NUMBER_LIT 2
+23:6: TIMES 遍
+24:5: HERE_ARE 吾有
+24:7: NUMBER_LIT 1
+24:8: VAR_TYPE 言
+24:10: SAID 曰
+24:11: STR_LIT "一願郎君千歲，二願妾身常健。"
+24:30: PRINT 書之
+25:1: END 云云
+27:1: HERE_IS_A 有
+27:2: VAR_TYPE 數
+27:3: NUMBER_LIT 3
+27:5: NAME_IT 名之曰
+27:8: IDENT '願數'
+29:1: COMMENT 注曰
+29:4: STR_LIT " 驗證 若 與 若非 之嵌套，以應第三願 "
+30:1: IF 若
+30:2: IDENT '願數'
+30:6: EXP_LOGIC >
+30:8: NUMBER_LIT 2
+30:9: TOPIC 者
+31:5: FOR 為是
+31:8: NUMBER_LIT 2
+31:10: TIMES 遍
+32:9: HERE_IS_A 有
+32:10: VAR_TYPE 言
+32:11: STR_LIT "三願如同梁上燕，歲歲長相見。"
+32:29: PRINT 書之
+33:5: END 云云
+34:1: ELSE 若非
+35:5: FOR 為是
+35:8: NUMBER_LIT 3
+35:10: TIMES 遍
+36:9: HERE_IS_A 有
+36:10: VAR_TYPE 言
+36:11: STR_LIT "怪哉！願數不足，花落人散兩成空！"
+36:31: PRINT 書之
+37:5: END 云云
+38:1: END 也

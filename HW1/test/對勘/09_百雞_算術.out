@@ -1,0 +1,158 @@
+﻿1:1: COMMENT 注曰
+1:4: STR_LIT "
+    斯篇專演「循環」與「明斷」之妙用。
+    借《張丘建算經》之「百錢買百雞」題，
+    以驗多重迴圈、算術運算，並以多言列印之功也。
+"
+7:1: HERE_ARE 吾有
+7:3: NUMBER_LIT 1
+7:4: VAR_TYPE 言
+7:6: SAID 曰
+7:7: STR_LIT "今有雞翁一，值錢五；雞母一，值錢三；雞雛三，值錢一。"
+7:38: PRINT 書之
+8:1: HERE_ARE 吾有
+8:3: NUMBER_LIT 1
+8:4: VAR_TYPE 言
+8:6: SAID 曰
+8:7: STR_LIT "凡百錢買雞百隻，問雞翁、母、雛各幾何？"
+8:31: PRINT 書之
+10:1: HERE_IS_A 有
+10:2: VAR_TYPE 數
+10:3: NUMBER_LIT 100
+10:6: NAME_IT 名之曰
+10:9: IDENT '百'
+11:1: HERE_IS_A 有
+11:2: VAR_TYPE 數
+11:3: NUMBER_LIT 0
+11:5: NAME_IT 名之曰
+11:8: IDENT '翁'
+13:1: COMMENT 注曰
+13:3: STR_LIT " 第一層迴圈：翁至多二十隻 "
+14:1: WHILE_TRUE 恆為是
+14:5: IF 若
+14:6: IDENT '翁'
+14:9: EXP_LOGIC >
+14:11: NUMBER_LIT 20
+14:13: TOPIC 者
+14:14: BREAK 乃止
+14:16: END 也
+16:5: HERE_IS_A 有
+16:6: VAR_TYPE 數
+16:7: NUMBER_LIT 0
+16:9: NAME_IT 名之曰
+16:12: IDENT '母'
+17:5: COMMENT 注曰
+17:7: STR_LIT " 第二層迴圈：母至多三十三隻 "
+18:5: WHILE_TRUE 恆為是
+18:9: IF 若
+18:10: IDENT '母'
+18:13: EXP_LOGIC >
+18:15: NUMBER_LIT 33
+18:18: TOPIC 者
+18:19: BREAK 乃止
+18:21: END 也
+20:9: COMMENT 注曰
+20:11: STR_LIT " 雛 = 百 - 翁 - 母 "
+21:9: EXP_MATH -
+21:10: IDENT '百'
+21:13: ->
+21:14: IDENT '翁'
+21:18: EXP_MATH -
+21:19: ITS 其
+21:20: ->
+21:21: IDENT '母'
+21:25: NAME_IT 名之曰
+21:28: IDENT '雛'
+23:9: COMMENT 注曰
+23:11: STR_LIT " 驗證 雛 是否為三之倍數 (雛 % 3 == 0) "
+24:9: EXP_MATH /
+24:10: IDENT '雛'
+24:13: ->
+24:14: NUMBER_LIT 3
+24:16: EXP_MATH_OP %
+24:21: NAME_IT 名之曰
+24:24: IDENT '雛餘'
+26:9: IF 若
+26:10: IDENT '雛餘'
+26:14: EXP_LOGIC ==
+26:16: NUMBER_LIT 0
+26:17: TOPIC 者
+27:13: COMMENT 注曰
+27:15: STR_LIT " 總價 = 翁*5 + 母*3 + 雛/3 "
+28:13: EXP_MATH *
+28:14: IDENT '翁'
+28:17: ->
+28:18: NUMBER_LIT 5
+28:20: NAME_IT 名之曰
+28:23: IDENT '翁價'
+29:13: EXP_MATH *
+29:14: IDENT '母'
+29:17: ->
+29:18: NUMBER_LIT 3
+29:20: NAME_IT 名之曰
+29:23: IDENT '母價'
+30:13: EXP_MATH /
+30:14: IDENT '雛'
+30:17: ->
+30:18: NUMBER_LIT 3
+30:20: NAME_IT 名之曰
+30:23: IDENT '雛價'
+32:13: EXP_MATH +
+32:14: IDENT '翁價'
+32:18: ->
+32:19: IDENT '母價'
+32:24: EXP_MATH +
+32:25: ITS 其
+32:26: ->
+32:27: IDENT '雛價'
+32:32: NAME_IT 名之曰
+32:35: IDENT '總價'
+34:13: IF 若
+34:14: IDENT '總價'
+34:18: EXP_LOGIC ==
+34:20: IDENT '百'
+34:23: TOPIC 者
+35:17: COMMENT 注曰
+35:19: STR_LIT " 採直接交錯列印文字與變數 "
+36:17: HERE_ARE 吾有
+36:19: NUMBER_LIT 7
+36:20: VAR_TYPE 言
+36:22: SAID 曰
+36:23: STR_LIT "得解：翁"
+36:32: SAID 曰
+36:33: IDENT '翁'
+37:21: SAID 曰
+37:22: STR_LIT "隻，母"
+37:30: SAID 曰
+37:31: IDENT '母'
+38:21: SAID 曰
+38:22: STR_LIT "隻，雛"
+38:30: SAID 曰
+38:31: IDENT '雛'
+39:21: SAID 曰
+39:22: STR_LIT "隻。"
+39:29: PRINT 書之
+40:13: END 也
+41:9: END 也
+43:9: EXP_MATH +
+43:10: IDENT '母'
+43:13: ->
+43:14: NUMBER_LIT 1
+43:16: PAST 昔之
+43:18: IDENT '母'
+43:21: TOPIC 者
+43:23: SET 今
+43:24: ITS 其
+43:25: IS_THUS 是矣
+44:5: END 云云
+46:5: EXP_MATH +
+46:6: IDENT '翁'
+46:9: ->
+46:10: NUMBER_LIT 1
+46:12: PAST 昔之
+46:14: IDENT '翁'
+46:17: TOPIC 者
+46:19: SET 今
+46:20: ITS 其
+46:21: IS_THUS 是矣
+47:1: END 云云

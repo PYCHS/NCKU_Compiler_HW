@@ -1,0 +1,210 @@
+﻿1:1: COMMENT 注曰
+1:4: STR_LIT "
+    斯篇綜匯型態宣告、易值及字串並聯輸出之法。
+    驗其單立與連立數、言、爻諸名，
+    考其更迭舊值，暨鎔鑄字串與變數而書之，
+    以測編譯轉譯之全功。
+"
+8:1: HERE_ARE 吾有
+8:3: NUMBER_LIT 1
+8:4: VAR_TYPE 數
+8:6: NAME_IT 名之曰
+8:9: IDENT '甲'
+8:50: COMMENT 注曰
+8:52: STR_LIT " int 甲; "
+9:1: HERE_ARE 吾有
+9:3: NUMBER_LIT 1
+9:4: VAR_TYPE 數
+9:6: SAID 曰
+9:7: NUMBER_LIT 1
+9:9: NAME_IT 名之曰
+9:12: IDENT '己'
+9:47: COMMENT 注曰
+9:49: STR_LIT " int 己 = 1; "
+10:1: HERE_ARE 吾有
+10:3: NUMBER_LIT 2
+10:4: VAR_TYPE 數
+10:6: SAID 曰
+10:7: NUMBER_LIT 3
+10:9: SAID 曰
+10:10: NUMBER_LIT 5
+10:12: NAME_IT 名之曰
+10:15: IDENT '乙'
+10:18: SAID 曰
+10:19: IDENT '丙'
+10:40: COMMENT 注曰
+10:42: STR_LIT " int 乙 = 3, 丙 = 5; "
+11:1: HERE_ARE 吾有
+11:3: NUMBER_LIT 3
+11:4: VAR_TYPE 數
+11:6: SAID 曰
+11:7: NUMBER_LIT 2
+11:9: SAID 曰
+11:10: NUMBER_LIT 4
+11:12: SAID 曰
+11:13: NUMBER_LIT 6
+11:15: NAME_IT 名之曰
+11:18: IDENT '辛'
+11:21: SAID 曰
+11:22: IDENT '壬'
+11:25: SAID 曰
+11:26: IDENT '癸'
+11:33: COMMENT 注曰
+11:35: STR_LIT " int 辛 = 2, 壬 = 4, 癸 = 6; "
+12:1: HERE_ARE 吾有
+12:3: NUMBER_LIT 2
+12:4: VAR_TYPE 數
+12:6: NAME_IT 名之曰
+12:9: IDENT '空'
+12:13: SAID 曰
+12:14: IDENT '無'
+12:45: COMMENT 注曰
+12:47: STR_LIT " int 空, 無; "
+14:1: HERE_ARE 吾有
+14:3: NUMBER_LIT 1
+14:4: VAR_TYPE 言
+14:6: SAID 曰
+14:7: STR_LIT "噫吁戲！"
+14:16: NAME_IT 名之曰
+14:19: IDENT '唉呀'
+14:39: COMMENT 注曰
+14:41: STR_LIT " char* 唉呀 = "噫吁戲！"; "
+15:1: HERE_ARE 吾有
+15:3: NUMBER_LIT 1
+15:4: VAR_TYPE 爻
+15:6: SAID 曰
+15:7: BOOL_LIT false
+15:9: NAME_IT 名之曰
+15:12: IDENT '陰陽'
+15:46: COMMENT 注曰
+15:48: STR_LIT " bool 陰陽 = false; "
+16:1: HERE_ARE 吾有
+16:3: NUMBER_LIT 1
+16:4: VAR_TYPE 元
+16:6: SAID 曰
+16:7: NUMBER_LIT 1
+16:9: NAME_IT 名之曰
+16:12: IDENT '隨義'
+16:46: COMMENT 注曰
+16:48: STR_LIT " int 隨義 = 1; "
+17:1: HERE_IS_A 有
+17:2: VAR_TYPE 爻
+17:4: NAME_IT 名之曰
+17:7: IDENT '否'
+17:52: COMMENT 注曰
+17:54: STR_LIT " bool 否; "
+19:1: HERE_IS_A 有
+19:2: VAR_TYPE 數
+19:3: NUMBER_LIT 50
+19:6: NAME_IT 名之曰
+19:9: IDENT '大衍'
+19:49: COMMENT 注曰
+19:51: STR_LIT " int 大衍 = 50; "
+20:1: HERE_IS_A 有
+20:2: VAR_TYPE 言
+20:3: STR_LIT "問天地好在。"
+20:14: NAME_IT 名之曰
+20:17: IDENT '文言'
+20:41: COMMENT 注曰
+20:43: STR_LIT " char* 文言 = "問天地好在。"; "
+21:1: PAST 昔之
+21:3: IDENT '丙'
+21:6: TOPIC 者
+21:8: SET 今
+21:9: IDENT '大衍'
+21:13: IS_THUS 是矣
+21:47: COMMENT 注曰
+21:49: STR_LIT " 丙 = 大衍; "
+22:1: HERE_ARE 吾有
+22:3: NUMBER_LIT 1
+22:4: VAR_TYPE 數
+22:6: SAID 曰
+22:7: IDENT '己'
+22:11: NAME_IT 名之曰
+22:14: IDENT '丁'
+22:45: COMMENT 注曰
+22:47: STR_LIT " int 丁 = 己; "
+24:1: COMMENT 注曰
+24:3: STR_LIT " printf("觀乎數理，甲得%d，乙得%d\n", 甲, 乙); "
+25:1: HERE_ARE 吾有
+25:3: NUMBER_LIT 4
+25:4: VAR_TYPE 言
+25:6: SAID 曰
+25:7: STR_LIT "觀乎數理，甲得"
+25:19: SAID 曰
+25:20: IDENT '甲'
+25:24: SAID 曰
+25:25: STR_LIT "，乙得"
+25:33: SAID 曰
+25:34: IDENT '乙'
+25:38: PRINT 書之
+27:1: COMMENT 注曰
+27:3: STR_LIT " printf("『丙』今化為大衍之數：%d\n", 丙); "
+28:1: HERE_ARE 吾有
+28:3: NUMBER_LIT 2
+28:4: VAR_TYPE 言
+28:6: SAID 曰
+28:7: STR_LIT "『丙』今化為大衍之數："
+28:23: SAID 曰
+28:24: IDENT '丙'
+28:28: PRINT 書之
+30:1: COMMENT 注曰
+30:3: STR_LIT " printf("陰陽之相乃%d\n", 陰陽); "
+31:1: HERE_ARE 吾有
+31:3: NUMBER_LIT 2
+31:4: VAR_TYPE 言
+31:6: SAID 曰
+31:7: STR_LIT "陰陽之相乃"
+31:17: SAID 曰
+31:18: IDENT '陰陽'
+31:23: PRINT 書之
+33:1: COMMENT 注曰
+33:3: STR_LIT " printf("有言曰：%s%s\n", 文言, 唉呀); "
+34:1: HERE_ARE 吾有
+34:3: NUMBER_LIT 3
+34:4: VAR_TYPE 言
+34:6: SAID 曰
+34:7: STR_LIT "有言曰："
+34:16: SAID 曰
+34:17: IDENT '文言'
+34:22: SAID 曰
+34:23: IDENT '唉呀'
+34:28: PRINT 書之
+36:1: COMMENT 注曰
+36:3: STR_LIT " printf("辛%d，壬%d，癸%d\n", 辛, 壬, 癸); "
+37:1: HERE_ARE 吾有
+37:3: NUMBER_LIT 6
+37:4: VAR_TYPE 言
+37:6: SAID 曰
+37:7: STR_LIT "辛"
+37:13: SAID 曰
+37:14: IDENT '辛'
+37:18: SAID 曰
+37:19: STR_LIT "，壬"
+37:26: SAID 曰
+37:27: IDENT '壬'
+37:31: SAID 曰
+37:32: STR_LIT "，癸"
+37:39: SAID 曰
+37:40: IDENT '癸'
+37:44: PRINT 書之
+39:1: COMMENT 注曰
+39:3: STR_LIT " printf("丁之值為：%d\n", 丁); "
+40:1: HERE_ARE 吾有
+40:3: NUMBER_LIT 2
+40:4: VAR_TYPE 言
+40:6: SAID 曰
+40:7: STR_LIT "丁之值為："
+40:17: SAID 曰
+40:18: IDENT '丁'
+40:22: PRINT 書之
+42:1: COMMENT 注曰
+42:3: STR_LIT " printf("隨義之值為：%d\n", 隨義); "
+43:1: HERE_ARE 吾有
+43:3: NUMBER_LIT 2
+43:4: VAR_TYPE 言
+43:6: SAID 曰
+43:7: STR_LIT "隨義之值為："
+43:18: SAID 曰
+43:19: IDENT '隨義'
+43:24: PRINT 書之

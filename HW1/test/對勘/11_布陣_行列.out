@@ -1,0 +1,153 @@
+﻿1:1: COMMENT 注曰
+1:4: STR_LIT "
+    斯篇專試陣列「充」、「之長」與「迴圈取值」之機巧。
+    不涉拼接、陣列易值、其一、其餘與凡字走訪，
+    以驗編譯器列法與索引之基石也。
+"
+7:1: HERE_ARE 吾有
+7:3: NUMBER_LIT 1
+7:4: VAR_TYPE 列
+7:6: NAME_IT 名之曰
+7:9: IDENT '五音'
+8:1: PUSH 充
+8:2: IDENT '五音'
+8:6: ->
+8:7: STR_LIT "宮"
+8:13: ->
+8:14: STR_LIT "商"
+8:20: ->
+8:21: STR_LIT "角"
+8:27: ->
+8:28: STR_LIT "徵"
+8:34: ->
+8:35: STR_LIT "羽"
+10:1: HERE_ARE 吾有
+10:3: NUMBER_LIT 1
+10:4: VAR_TYPE 列
+10:6: NAME_IT 名之曰
+10:9: IDENT '四象'
+11:1: PUSH 充
+11:2: IDENT '四象'
+11:6: ->
+11:7: STR_LIT "青龍"
+11:14: ->
+11:15: STR_LIT "白虎"
+11:22: ->
+11:23: STR_LIT "朱雀"
+11:30: ->
+11:31: STR_LIT "玄武"
+13:1: HERE_ARE 吾有
+13:3: NUMBER_LIT 1
+13:4: VAR_TYPE 列
+13:6: NAME_IT 名之曰
+13:9: IDENT '天地萬象'
+14:1: PUSH 充
+14:2: IDENT '天地萬象'
+14:8: ->
+14:9: IDENT '五音'
+14:14: ->
+14:15: IDENT '四象'
+16:1: HERE_ARE 吾有
+16:3: NUMBER_LIT 1
+16:4: VAR_TYPE 言
+16:6: SAID 曰
+16:7: STR_LIT "五音之長，計有："
+16:20: PRINT 書之
+17:1: THOSE 夫
+17:2: IDENT '五音'
+17:6: LENGTH 之長
+17:9: PRINT 書之
+19:1: HERE_ARE 吾有
+19:3: NUMBER_LIT 1
+19:4: VAR_TYPE 言
+19:6: SAID 曰
+19:7: STR_LIT "四象之長，計有："
+19:20: PRINT 書之
+20:1: THOSE 夫
+20:2: IDENT '四象'
+20:6: LENGTH 之長
+20:9: PRINT 書之
+22:1: HERE_ARE 吾有
+22:3: NUMBER_LIT 1
+22:4: VAR_TYPE 言
+22:6: SAID 曰
+22:7: STR_LIT "天地萬象之長（內含幾列），計有："
+22:28: PRINT 書之
+23:1: THOSE 夫
+23:2: IDENT '天地萬象'
+23:8: LENGTH 之長
+23:11: PRINT 書之
+25:1: COMMENT 注曰
+25:4: STR_LIT " 測試以恆為是迴圈與索引逐一取出陣列內容 "
+26:1: HERE_ARE 吾有
+26:3: NUMBER_LIT 1
+26:4: VAR_TYPE 言
+26:6: SAID 曰
+26:7: STR_LIT "以迴圈逐一取五音列中之物："
+26:25: PRINT 書之
+28:1: HERE_IS_A 有
+28:2: VAR_TYPE 數
+28:3: NUMBER_LIT 1
+28:5: NAME_IT 名之曰
+28:8: IDENT '甲'
+29:1: WHILE_TRUE 恆為是
+29:5: IF 若
+29:6: IDENT '甲'
+29:9: EXP_LOGIC >
+29:11: IDENT '五音'
+29:15: LENGTH 之長
+29:17: TOPIC 者
+29:19: BREAK 乃止
+29:21: END 也
+30:5: THOSE 夫
+30:6: IDENT '五音'
+30:10: INDEX 之
+30:11: IDENT '甲'
+30:15: PRINT 書之
+31:5: EXP_MATH +
+31:6: IDENT '甲'
+31:9: ->
+31:10: NUMBER_LIT 1
+31:12: PAST 昔之
+31:14: IDENT '甲'
+31:17: TOPIC 者
+31:19: SET 今
+31:20: ITS 其
+31:21: IS_THUS 是矣
+32:1: END 云云
+34:1: HERE_ARE 吾有
+34:3: NUMBER_LIT 1
+34:4: VAR_TYPE 言
+34:6: SAID 曰
+34:7: STR_LIT "以迴圈逐一取四象列中之物："
+34:25: PRINT 書之
+36:1: HERE_IS_A 有
+36:2: VAR_TYPE 數
+36:3: NUMBER_LIT 1
+36:5: NAME_IT 名之曰
+36:8: IDENT '乙'
+37:1: WHILE_TRUE 恆為是
+37:5: IF 若
+37:6: IDENT '乙'
+37:9: EXP_LOGIC >
+37:11: IDENT '四象'
+37:15: LENGTH 之長
+37:17: TOPIC 者
+37:19: BREAK 乃止
+37:21: END 也
+38:5: THOSE 夫
+38:6: IDENT '四象'
+38:10: INDEX 之
+38:11: IDENT '乙'
+38:15: PRINT 書之
+39:5: EXP_MATH +
+39:6: IDENT '乙'
+39:9: ->
+39:10: NUMBER_LIT 1
+39:12: PAST 昔之
+39:14: IDENT '乙'
+39:17: TOPIC 者
+39:19: SET 今
+39:20: ITS 其
+39:21: IS_THUS 是矣
+40:1: END 云云
