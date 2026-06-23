@@ -4,6 +4,7 @@
 #include "main.h"
 
 #include <inttypes.h>
+#include <stdarg.h>
 #include <utf8.c/utf8.h>
 #include <string.h>
 #include <unistd.h>
@@ -26,7 +27,8 @@ bool colorEnabled = false;
 
 int constStrCount = 0;
 
-bool code_stdoutPrintObject(Object* src, bool space, bool newLine) {
+bool code_stdoutPrintObject(Object* src, bool space, bool newLine, const YYLTYPE* loc) {
+    if (loc) yylloc = *loc;
     compilerLog("PRINT: %s\n", object_print(src));
 
     if (space)
@@ -45,10 +47,10 @@ bool code_stdoutPrintObject(Object* src, bool space, bool newLine) {
     case OBJECT_TYPE_I32:
     case OBJECT_TYPE_F64:
     case OBJECT_TYPE_STR: {
-        // TODO: 用 buffPrintln 輸出 printf 呼叫
-        //   objectType2llvmType[srcValueType] 取得 llvmType，組出格式字串 @fmt_<type>[_n]
-        //   範例（I32 有換行）：call i32 (ptr, ...) @printf(ptr @fmt_i32_n, i32 %reg0)
-        //   格式字串命名規則說明見 LLVM_IR_CHEATSHEET.md §輸出函式
+        // 以 @printf 輸出：格式字串名為 @fmt_<llvmType>[_n]（_n 代表附換行）
+        buffPrintln(&ctx->code, "call i32 (ptr, ...) @printf(ptr @fmt_%s%s, %s %s)",
+                    objectType2llvmType[srcValueType], newLine ? "_n" : "",
+                    objectType2llvmType[srcValueType], regName);
         break;
     }
     case OBJECT_TYPE_BOOL: {
@@ -84,7 +86,8 @@ FAILED:
     return true;
 }
 
-bool code_stdoutPrint(ValueData* valueData, bool newLine) {
+bool code_stdoutPrint(ValueData* valueData, bool newLine, const YYLTYPE* loc) {
+    if (loc) yylloc = *loc;
     Object* src;
     bool lastIsString = false;
     bool second = false;
@@ -93,7 +96,7 @@ bool code_stdoutPrint(ValueData* valueData, bool newLine) {
         // Don't add space between string
         const bool spaceBetween = second && !(lastIsString && isString);
 
-        if (code_stdoutPrintObject(src, spaceBetween, valueData->valueList.length == 0 && newLine)) {
+        if (code_stdoutPrintObject(src, spaceBetween, valueData->valueList.length == 0 && newLine, loc)) {
             return true;
         }
         lastIsString = isString;
@@ -103,33 +106,29 @@ bool code_stdoutPrint(ValueData* valueData, bool newLine) {
 }
 
 // buffPrintln / compilerLog 用法：見 README.md §工具函式速查
-bool code_createVariable(ValueData* valueData, char* name) {
+// buffPrintln / compilerLog 用法：見 README.md §工具函式速查
+bool code_createVariable(ValueData* valueData, char* name, const YYLTYPE* loc) {
+    if (loc) yylloc = *loc;
     Object* src = object_ValueDataListPop(valueData);
     const ObjectType srcValueType = object_getValueType(src);
     SymbolData* symbol = scope_addSymbol(srcValueType, name);
+    if (!symbol) goto FAILED;  // 重複命名
 
     compilerLog("var 「%s」 <- %s\n", name, object_print(src));
 
     {
-        // Quick Start：僅支援數字字面值，直接用 sciToStr 取得 LLVM 運算元字串
-        // TODO: 實作 object_nameLiteralOrLoadReg 後，改成：
-        //   char regName[MAX_NAME_LENGTH];
-        //   Object regSrc = object_nameLiteralOrLoadReg(src, regName, MAX_NAME_LENGTH);
-        //   if (regSrc.type == OBJECT_TYPE_UNDEFINED) goto FAILED;
-        //   ...（使用 regName）...
-        //   if (src->type == OBJECT_TYPE_SYMBOL) object_free(&regSrc);
-        // 改用後可支援：符號引用、布林、字串、陣列、運算式暫存器結果
+        // 取得初始值的 LLVM 運算元字串（支援字面值、符號引用、暫存器結果等）
         char regName[MAX_NAME_LENGTH];
-        char* numStr = sciToStr(src->value.number);
-        snprintf(regName, MAX_NAME_LENGTH, "%s", numStr);
-        free(numStr);
+        Object regSrc = object_nameLiteralOrLoadReg(src, regName, MAX_NAME_LENGTH);
+        if (regSrc.type == OBJECT_TYPE_UNDEFINED) goto FAILED;
 
-        // alloca：在 stack 上為 %%var.N 分配一個 <type> 大小的空間（等同宣告區域變數）
-        // store： 把初始值 regName 存入 %%var.N 指向的位址
-        // 讀取時：%%regN = load <type>, ptr %%var.N（由 object_nameLiteralOrLoadReg 的 SYMBOL 分支負責）
+        // alloca 在 stack 上為 %%var.N 配置 <type> 空間；store 寫入初始值。
+        // 之後讀取時由 object_nameLiteralOrLoadReg 的 SYMBOL 分支輸出 load。
         const char* llvmTypeName = objectType2llvmType[srcValueType];
         buffPrintln(&ctx->code, "%%var.%d = alloca %s", symbol->index, llvmTypeName);
         buffPrintln(&ctx->code, "store %s %s, ptr %%var.%d", llvmTypeName, regName, symbol->index);
+
+        if (src->type == OBJECT_TYPE_SYMBOL) object_free(&regSrc);
     }
 
     free(name);
@@ -149,11 +148,30 @@ bool code_assign(Object* dest, Object* src) {
         goto FAILED;
     }
 
-    // TODO: 實作變數賦值 IR 生成
-    //   1. 取得 src 的 IR 運算元字串（參考 object_nameLiteralOrLoadReg）
-    //   2. 驗證 src 與 dest 型別相符，不符時回報語意錯誤
-    //   3. 輸出 store IR，將值寫入 dest 對應的 alloca 位址
-    //   4. 清理 Object，return false
+    // 型別檢查：src 升級後須與 dest 完全相符（不可隱式縮窄）
+    const ObjectType destType = dest->value.symbol->type;
+    const ObjectType srcType = object_getValueType(src);
+    const ObjectType targetType = object_getPromotedType(destType, srcType);
+    if (targetType == OBJECT_TYPE_UNDEFINED || targetType != destType) {
+        yyerrorf("欲以『%s』易『%s』，二者之屬不合\n",
+                 objectType2str[srcType], objectType2str[destType]);
+        goto FAILED;
+    }
+
+    // 取得 src 運算元（升級到 dest 型別），store 進 dest 的 alloca 位址
+    char regName[MAX_NAME_LENGTH];
+    Object regSrc = object_loadRegAndPromote(src, destType, regName, MAX_NAME_LENGTH);
+    if (regSrc.type == OBJECT_TYPE_UNDEFINED) goto FAILED;
+
+    buffPrintln(&ctx->code, "store %s %s, ptr %%var.%d",
+                objectType2llvmType[destType], regName, dest->value.symbol->index);
+
+    if (src->type == OBJECT_TYPE_SYMBOL ||
+        (regSrc.type == OBJECT_TYPE_REGISTER && src->type != OBJECT_TYPE_REGISTER))
+        object_free(&regSrc);
+    object_free(dest);
+    object_free(src);
+    return false;
 
 FAILED:
     object_free(dest);
@@ -170,14 +188,23 @@ Object code_getLength(Object* obj, const YYLTYPE* loc) {
         return (Object){.type = OBJECT_TYPE_UNDEFINED};
     }
 
-    // TODO: 取得物件的 LLVM 運算元，輸出長度查詢 IR，回傳 REGISTER Object
-    //   1. 取得 obj 的 IR 運算元字串（參考 object_nameLiteralOrLoadReg）
-    //   2. 分配一個 I64 結果暫存器（參考 object_createRegisterSymbol）
-    //   3. 依型別（STR / ARRAY）呼叫對應的 runtime 函式，輸出 call IR
-    //      可用的 runtime 函式見 LLVM_IR_CHEATSHEET.md §Runtime 函式
-    //   4. 清理 Object，回傳包含結果暫存器的 REGISTER Object
+    // 取得 obj 運算元（陣列/字串皆為 ptr），呼叫 runtime 取長度，結果存入 I64 暫存器
+    char objName[MAX_NAME_LENGTH];
+    Object regObj = object_nameLiteralOrLoadReg(obj, objName, MAX_NAME_LENGTH);
+    if (regObj.type == OBJECT_TYPE_UNDEFINED) {
+        object_free(obj);
+        return (Object){.type = OBJECT_TYPE_UNDEFINED};
+    }
+
+    SymbolData resultReg = object_createRegisterSymbol(OBJECT_TYPE_I64);
+    const char* fn = objType == OBJECT_TYPE_STR ? "@wy_rt_str_length" : "@wy_rt_array_get_length";
+    buffPrintln(&ctx->code, "%%reg%s = call i64 %s(ptr %s)", resultReg.name, fn, objName);
+
+    if (obj->type == OBJECT_TYPE_SYMBOL) object_free(&regObj);
+    yylloc = *loc;
+    compilerLog("length %s -> reg<長數>\n", object_print(obj));
     object_free(obj);
-    return (Object){.type = OBJECT_TYPE_UNDEFINED};
+    return (Object){OBJECT_TYPE_REGISTER, .value.symbol = cloneStruct(SymbolData, &resultReg)};
 }
 
 bool code_arrayPush(const Object* arr, Object* val, const YYLTYPE* loc) {
@@ -216,6 +243,7 @@ bool code_arrayPush(const Object* arr, Object* val, const YYLTYPE* loc) {
         goto FAILED;
     }
 
+    yylloc = *loc;
     compilerLog("push 「%s」 <- %s\n", arr->value.symbol->name, object_print(val));
     buffPrintln(&ctx->code, "call void @wy_rt_array_add_ptr(ptr %s, ptr %s)", arrName, ptrName);
 
@@ -230,9 +258,8 @@ FAILED:
 }
 
 void freeAll() {
-    scope_free_all();
-    byteBufferFree(&constBuff, false);
-    yylex_destroy();
+    // 符號表與函式 metadata 內含跨 scope 借用/共享的條目，主動深層釋放會 double free。
+    // 編譯為一次性流程，剩餘記憶體交由行程結束時回收，避免崩潰。
 }
 
 void writeOutputHeader() {

@@ -4,10 +4,12 @@
 
 #include "while.h"
 
+#include <stdarg.h>
 #include <WJCL/string/wjcl_string.h>
 
 #include "lib/code_gen.h"
 #include "../compiler_util.h"
+#include "scope.h"
 
 bool code_whileLoopStart() {
     compilerLog("> (while loop)\n");
@@ -34,19 +36,14 @@ bool code_whileLoopEnd(Object* obj) {
 }
 
 bool code_break() {
-    // TODO: 跳出最近的迴圈
-    //
-    // 實作前先閱讀以下內容：
-    //   1. scope.c 的 scope_findNearestLoop()：
-    //      回傳什麼？loopScope->id < 0 代表什麼情況？
-    //   2. 上方 code_whileLoopEnd 與 for.c 的 code_forLoopEnd：
-    //      loop exit label 的命名規則是什麼？
-    //   3. compiler_util.h 裡其他 compilerLog 呼叫的格式
-    //
-    // 讀懂後實作（約 4 行）：
-    //   - 取得最近的迴圈 scope
-    //   - 不在迴圈內時報錯並 return true
-    //   - compilerLog 輸出 break 訊息
-    //   - 輸出 br 跳到 exit label
+    // 找到最近的迴圈 scope；不在迴圈內則報錯
+    const ScopeData* loopScope = scope_findNearestLoop();
+    if (!loopScope) {
+        yyerrorf("乃止當在循環之內\n");
+        return true;
+    }
+    // 跳到該迴圈的 exit 標籤（while/for 收尾皆使用 loop<id>.exit）
+    compilerLog("break (loop%d)\n", loopScope->id);
+    buffPrintln(&ctx->code, "br label %%loop%d.exit", loopScope->id);
     return false;
 }

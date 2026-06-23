@@ -36,14 +36,66 @@ Object code_expression(const ExpOp eop, const bool opLeft, Object* a, Object* b,
 
     const ObjectType targetType = object_getPromotedType(aValueType, bValueType);
 
-    // TODO: 實作二元運算式 IR 生成，完成後回傳 OBJECT_TYPE_REGISTER Object
-    //   1. 分配結果暫存器（型別視運算子是否輸出布林而定）
-    //   2. 驗證運算子與型別合法（isExpressionOperationLegal）
-    //   3. 取得兩側運算元字串，注意 opLeft 決定 a/b 的左右方向
-    //   4. 根據型別（整數/浮點）選擇對應的 IR opcode（opIRIntNames / opIRFloatNames）
-    //   5. 輸出 IR 指令；字串加法需呼叫 runtime 函式而非算術指令
-    //      可用的 IR opcode 與 runtime 函式見 LLVM_IR_CHEATSHEET.md
-    //   6. 清理 Object，回傳 REGISTER Object
+    /* 兩側型別無法統一升級 */
+    if (targetType == OBJECT_TYPE_UNDEFINED) {
+        yyerrorf("『%s』與『%s』不可同算\n", objectType2str[aValueType], objectType2str[bValueType]);
+        goto FAILED;
+    }
+
+    /* 運算子合法性檢查（算術/邏輯/取餘各有適用型別） */
+    if (!isExpressionOperationLegal(eop, targetType))
+        goto FAILED;
+
+    /* 比較/邏輯運算輸出 i1（BOOL），其餘維持升級後型別 */
+    const ObjectType resultType = ExpOp_isOutputLogic(eop) ? OBJECT_TYPE_BOOL : targetType;
+    SymbolData resultReg = object_createRegisterSymbol(resultType);
+
+    /* 取得兩側運算元字串，並升級到統一型別 */
+    char aName[MAX_NAME_LENGTH], bName[MAX_NAME_LENGTH];
+    Object regA = object_loadRegAndPromote(a, targetType, aName, MAX_NAME_LENGTH);
+    if (regA.type == OBJECT_TYPE_UNDEFINED) goto FAILED;
+    Object regB = object_loadRegAndPromote(b, targetType, bName, MAX_NAME_LENGTH);
+    if (regB.type == OBJECT_TYPE_UNDEFINED) {
+        if (a->type == OBJECT_TYPE_SYMBOL || (regA.type == OBJECT_TYPE_REGISTER && a->type != OBJECT_TYPE_REGISTER))
+            object_free(&regA);
+        goto FAILED;
+    }
+
+    /* opLeft 決定運算元左右順序（如 "以 a 減 b" 與 "減 b 於 a" 方向相反） */
+    const char* left = opLeft ? aName : bName;
+    const char* right = opLeft ? bName : aName;
+
+    if (targetType == OBJECT_TYPE_STR && eop == OP_ADD) {
+        /* 字串相加 → 呼叫 runtime 串接函式 */
+        buffPrintln(&ctx->code, "%%reg%s = call ptr @wy_rt_str_concat(ptr %s, ptr %s)",
+                    resultReg.name, left, right);
+    } else {
+        const char* opName = ObjectType_isFloat(targetType) ? opIRFloatNames[eop] : opIRIntNames[eop];
+        if (!opName) {
+            yyerrorf("運算符號『%s』不適用於『%s』之屬\n", expOp2str[eop], objectType2str[targetType]);
+            if (a->type == OBJECT_TYPE_SYMBOL || (regA.type == OBJECT_TYPE_REGISTER && a->type != OBJECT_TYPE_REGISTER))
+                object_free(&regA);
+            if (b->type == OBJECT_TYPE_SYMBOL || (regB.type == OBJECT_TYPE_REGISTER && b->type != OBJECT_TYPE_REGISTER))
+                object_free(&regB);
+            goto FAILED;
+        }
+        buffPrintln(&ctx->code, "%%reg%s = %s %s %s, %s",
+                    resultReg.name, opName, objectType2llvmType[targetType], left, right);
+    }
+
+    const Object* leftObj = opLeft ? a : b;
+    const Object* rightObj = opLeft ? b : a;
+    compilerLog("exp %s %s %s -> reg<%s>\n",
+                object_print(leftObj), opDebugNames[eop], object_print(rightObj), objectType2str[resultType]);
+
+    /* 釋放載入運算元時新建的暫存器 Object（僅當其為新分配時） */
+    if (a->type == OBJECT_TYPE_SYMBOL || (regA.type == OBJECT_TYPE_REGISTER && a->type != OBJECT_TYPE_REGISTER))
+        object_free(&regA);
+    if (b->type == OBJECT_TYPE_SYMBOL || (regB.type == OBJECT_TYPE_REGISTER && b->type != OBJECT_TYPE_REGISTER))
+        object_free(&regB);
+    if (!object_sameRegister(a, b)) object_free(a);
+    object_free(b);
+    return (Object){OBJECT_TYPE_REGISTER, .value.symbol = cloneStruct(SymbolData, &resultReg)};
 
 FAILED:
     if (!object_sameRegister(a, b)) object_free(a);

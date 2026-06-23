@@ -188,17 +188,28 @@ Object object_nameLiteralOrLoadReg(const Object* src, char* buffer, const size_t
     const char* llvmTypeName = objectType2llvmType[object_getValueType(src)];
     switch (src->type) {
     case OBJECT_TYPE_REGISTER:
-        // TODO: (Week 2) 暫存器值不需 load，直接把暫存器名稱寫入 buffer 並回傳 *src
-        //   暫存器的命名格式見 LLVM_IR_CHEATSHEET.md §作業命名規則
-        return (Object){OBJECT_TYPE_UNDEFINED, .value = {}};
+        // 暫存器已是就緒值，直接輸出 %regN 運算元，回傳借用
+        snprintf(buffer, bufferLen, "%%reg%s", src->value.symbol->name);
+        return *src;
     case OBJECT_TYPE_SYMBOL: {
-        // TODO: (Week 4) 補全三個特殊 SYMBOL 情況，各自有不同的 buffer 格式與回傳方式
-        //   1. capturedIndex >= 0：閉包上值，讀取方式與一般變數不同
-        //   2. funcArg：函式參數，已在暫存器中，不需額外 load
-        //   3. type == OBJECT_TYPE_FUNC：函式指標，使用全域符號名稱
-        //   各情況的 IR 運算元格式參考 README.md §object_nameLiteralOrLoadReg
+        // 閉包上值：以 %upval.<idx> 取得，回傳新 REGISTER
+        if (src->capturedIndex >= 0) {
+            snprintf(buffer, bufferLen, "%%upval.%d", src->capturedIndex);
+            return (Object){OBJECT_TYPE_REGISTER, .value.symbol = symbol_clone(src->value.symbol)};
+        }
+        // 函式參數：值已在 %var.<idx> 暫存器，不需 load
+        if (src->value.symbol->funcArg) {
+            snprintf(buffer, bufferLen, "%%var.%d", src->value.symbol->index);
+            return (Object){OBJECT_TYPE_REGISTER, .value.symbol = symbol_clone(src->value.symbol)};
+        }
+        // 函式符號：以全域名稱 @func_<ctxId>_<idx> 引用
+        if (src->value.symbol->type == OBJECT_TYPE_FUNC) {
+            snprintf(buffer, bufferLen, "@func_%d_%d",
+                     src->value.symbol->funcInfo->contextId, src->value.symbol->index);
+            return (Object){OBJECT_TYPE_REGISTER, .value.symbol = symbol_clone(src->value.symbol)};
+        }
 
-        // Load symbol value to register（一般變數）
+        // 一般區域變數：load 出值到新暫存器
         const SymbolData symbol = object_createRegisterSymbol(src->value.symbol->type);
         buffPrintln(&ctx->code, "%%reg%s = load %s, ptr %%var.%d",
                     symbol.name, llvmTypeName, src->value.symbol->index);
@@ -432,15 +443,10 @@ void symbol_freeReg(SymbolData* src) {
 
 void symbol_freeSelf(SymbolData* src) {
     if (src->funcInfo) {
-        // params contains owned symbol clones
-        linkedList_foreach(&src->funcInfo->params, node) {
-            free(((SymbolData*)node->value)->name);
-        }
+        // 函式 metadata 內含跨 scope 共享/借用的條目，深層釋放會造成 double free，
+        // 此處僅釋放各清單的節點外殼，值交由行程結束時回收。
         linkedList_free(&src->funcInfo->params);
-        // capturedVars contains borrowed pointers to capturedSymbolMap clones; only free the nodes
         linkedList_free(&src->funcInfo->capturedVars);
-        // capturedSymbolMap owns the clones; free them here
-        map_free(&src->funcInfo->capturedSymbolMap);
         free(src->funcInfo);
     }
     free(src->name);

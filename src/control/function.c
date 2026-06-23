@@ -226,7 +226,15 @@ bool func_callArgAdd(FuncCallInfo* funcCall, Object* arg, const YYLTYPE* argLoca
         return true;
     }
 
-    linkedList_addp(&funcCall->args, false, cloneStruct(Object, arg));
+    // 深拷貝引數值，避免上層釋放原 Object 後造成懸空指標 / double free
+    Object* clone = cloneStruct(Object, arg);
+    if (arg->type == OBJECT_TYPE_STR && arg->value.str)
+        clone->value.str = strdup(arg->value.str);
+    else if (ObjectType_isNumber(arg->type) && arg->value.number)
+        clone->value.number = cloneStruct(ScientificNotation, arg->value.number);
+    else if (arg->type == OBJECT_TYPE_REGISTER && arg->value.symbol)
+        clone->value.symbol = symbol_clone(arg->value.symbol);
+    linkedList_addp(&funcCall->args, false, clone);
     funcCall->currentArg = funcCall->currentArg->next;
 
     return false;

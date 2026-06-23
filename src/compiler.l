@@ -24,6 +24,7 @@
         if (yytextUtf8.str) {
             yylengUtf8 = utf8_char_count(yytextUtf8);
 
+            yylloc.first_line = yylineno;
             yylloc.last_line = yylineno;
             yylloc.first_column = yycolumnUtf8;
             yylloc.last_column = yycolumnUtf8 + yylengUtf8 - 1;
@@ -144,31 +145,95 @@ EXCLUDE_QUO [\x20-\x7E]|{B2}|{B3_1}|{B3_2_EXCLUDE_QUO}|{B3_3}|{B3_4}|{B4_1}|{B4_
 /* Rules section */
 %%
 
- /* TODO: 請在此補齊所有 token 規則
-  *
-  * 每條規則格式：
-  *   "文言字串" { yylval.<欄位> = <值>; lexerLog("TOKEN_NAME ...\n"); return TOKEN_NAME; }
-  *
-  * 純關鍵字（無 <欄位> 宣告）只需要 return：
-  *   "文言字串" { lexerLog("TOKEN_NAME ...\n"); return TOKEN_NAME; }
-  *
-  * 需要設定 yylval 的 token 類型對照 compiler.y 的 %union 與 %token <欄位> 宣告：
-  *   - s_var  : STR_LIT, IDENT
-  *   - n_var  : NUMBER_LIT
-  *   - b_var  : BOOL_LIT
-  *   - var_type : VAR_TYPE, VAR_TYPE_FUNC
-  *   - exp_op : EXP_MATH_OP, EXP_MATH_MOD_OP, EXP_LOGIC_OP, EXP_BINARY_LOGIC_OP
-  *   - exp_left : EXP_PREPOSITION
-  *
-  * 注意：
-  *   - 字串字面值（「「...」」）與識別符（「...」）使用 STR_CON / IDENT_CON 狀態與 yymore_utf8()
-  *   - 數字使用 chineseToArabic(yytext, &yylval.n_var)
-  *   - 新增 token "以施" → TO_CALL（後置函式呼叫）
-  *   - "乃得" 需支援可選後綴「矣」：「乃得」"矣"?
-  */
+ /* ── 字串字面值 「「...」」 ── 進入 STR_CON 狀態累積字元，遇 」」 收尾 */
+"「「" { BEGIN(STR_CON); yymore_utf8(); }
+<STR_CON>"」」" { BEGIN(INITIAL); trimStringToken(6, &yylval.s_var); lexerLog("STR_LIT \"%s\"\n", yylval.s_var); return STR_LIT; }
+<STR_CON>\r?\n { updateNewline(); yymore(); }
+<STR_CON>{EXCLUDE_QUO}+ { yymore_utf8(); }
+<STR_CON>"」" { yymore_utf8(); }
 
-"。" {}
-"，" {}
+ /* ── 識別符 「...」 ── 進入 IDENT_CON 狀態，遇單一 」 收尾 */
+"「" { BEGIN(IDENT_CON); yymore_utf8(); }
+<IDENT_CON>"」" { BEGIN(INITIAL); trimStringToken(3, &yylval.s_var); lexerLog("IDENT 「%s」\n", yylval.s_var); return IDENT; }
+<IDENT_CON>\r?\n { updateNewline(); yymore(); }
+<IDENT_CON>{EXCLUDE_QUO}+ { yymore_utf8(); }
+
+ /* ── 註解引導詞 ── */
+"注曰"|"疏曰"|"批曰" { lexerLog("COMMENT %s\n", yytext); return COMMENT; }
+
+ /* ── 宣告 / 命名 / 賦值關鍵字 ── */
+"今有"|"吾有" { lexerLog("HERE_ARE %s\n", yytext); return HERE_ARE; }
+"有"          { lexerLog("HERE_IS_A %s\n", yytext); return HERE_IS_A; }
+"名之曰"      { lexerLog("NAME_IT %s\n", yytext); return NAME_IT; }
+"曰"          { lexerLog("SAID %s\n", yytext); return SAID; }
+"昔之"        { lexerLog("PAST %s\n", yytext); return PAST; }
+"者"          { lexerLog("TOPIC %s\n", yytext); return TOPIC; }
+"今"          { lexerLog("SET %s\n", yytext); return SET; }
+"其"          { lexerLog("ITS %s\n", yytext); return ITS; }
+"是矣"        { lexerLog("IS_THUS %s\n", yytext); return IS_THUS; }
+
+ /* ── 型別 ── 型別資訊放入 yylval.var_type ── */
+"術" { yylval.var_type = OBJECT_TYPE_FUNC;  lexerLog("VAR_TYPE_FUNC %s\n", yytext); return VAR_TYPE_FUNC; }
+"爻" { yylval.var_type = OBJECT_TYPE_BOOL;  lexerLog("VAR_TYPE BOOL\n");  return VAR_TYPE; }
+"數" { yylval.var_type = OBJECT_TYPE_NUM;   lexerLog("VAR_TYPE NUM\n");   return VAR_TYPE; }
+"言" { yylval.var_type = OBJECT_TYPE_STR;   lexerLog("VAR_TYPE STR\n");   return VAR_TYPE; }
+"長" { yylval.var_type = OBJECT_TYPE_I64;   lexerLog("VAR_TYPE I64\n");   return VAR_TYPE; }
+"元" { yylval.var_type = OBJECT_TYPE_AUTO;  lexerLog("VAR_TYPE AUTO\n");  return VAR_TYPE; }
+"列" { yylval.var_type = OBJECT_TYPE_ARRAY; lexerLog("VAR_TYPE ARRAY\n"); return VAR_TYPE; }
+
+ /* ── 布林字面值 ── */
+"陰" { yylval.b_var = false; lexerLog("BOOL_LIT false\n"); return BOOL_LIT; }
+"陽" { yylval.b_var = true;  lexerLog("BOOL_LIT true\n");  return BOOL_LIT; }
+
+ /* ── 運算子 ── 運算類別放入 yylval.exp_op，介係詞方向放入 exp_left ── */
+"加" { yylval.exp_op = OP_ADD; lexerLog("EXP_MATH_OP +\n"); return EXP_MATH_OP; }
+"減" { yylval.exp_op = OP_SUB; lexerLog("EXP_MATH_OP -\n"); return EXP_MATH_OP; }
+"乘" { yylval.exp_op = OP_MUL; lexerLog("EXP_MATH_OP *\n"); return EXP_MATH_OP; }
+"除" { yylval.exp_op = OP_DIV; lexerLog("EXP_MATH_OP /\n"); return EXP_MATH_OP; }
+"所餘幾何" { yylval.exp_op = OP_MOD; lexerLog("EXP_MATH_MOD_OP %%\n"); return EXP_MATH_MOD_OP; }
+"於" { yylval.exp_left = false; lexerLog("EXP_PREPOSITION <-\n"); return EXP_PREPOSITION; }
+"以" { yylval.exp_left = true;  lexerLog("EXP_PREPOSITION ->\n"); return EXP_PREPOSITION; }
+"中有陽乎" { yylval.exp_op = OP_OR; lexerLog("EXP_BINARY_LOGIC_OP ||\n"); return EXP_BINARY_LOGIC_OP; }
+"中無陰乎" { yylval.exp_op = OP_AN; lexerLog("EXP_BINARY_LOGIC_OP &&\n"); return EXP_BINARY_LOGIC_OP; }
+"不大於" { yylval.exp_op = OP_LE; lexerLog("EXP_LOGIC_OP <=\n"); return EXP_LOGIC_OP; }
+"不小於" { yylval.exp_op = OP_GE; lexerLog("EXP_LOGIC_OP >=\n"); return EXP_LOGIC_OP; }
+"大於"   { yylval.exp_op = OP_GT; lexerLog("EXP_LOGIC_OP >\n");  return EXP_LOGIC_OP; }
+"小於"   { yylval.exp_op = OP_LT; lexerLog("EXP_LOGIC_OP <\n");  return EXP_LOGIC_OP; }
+"不等於" { yylval.exp_op = OP_NE; lexerLog("EXP_LOGIC_OP !=\n"); return EXP_LOGIC_OP; }
+"等於"   { yylval.exp_op = OP_EQ; lexerLog("EXP_LOGIC_OP ==\n"); return EXP_LOGIC_OP; }
+
+ /* ── 控制流 ── */
+"若非"   { lexerLog("ELSE %s\n", yytext); return ELSE; }
+"或若"   { lexerLog("ELSE_IF %s\n", yytext); return ELSE_IF; }
+"若"     { lexerLog("IF %s\n", yytext); return IF; }
+"恆為是" { lexerLog("WHILE_TRUE %s\n", yytext); return WHILE_TRUE; }
+"為是"   { lexerLog("FOR %s\n", yytext); return FOR; }
+"遍"     { lexerLog("TIMES %s\n", yytext); return TIMES; }
+"乃止"   { lexerLog("BREAK %s\n", yytext); return BREAK; }
+"乃得""矣"? { lexerLog("RETURN %s\n", yytext); return RETURN; }
+"云云"|"也"|"矣" { lexerLog("END %s\n", yytext); return END; }
+
+ /* ── 函式 / 陣列 / 輸出 ── */
+"欲行是術"          { lexerLog("TO_PERFORM_FUNC %s\n", yytext); return TO_PERFORM_FUNC; }
+"必先得"            { lexerLog("REQUIRE_ARGS %s\n", yytext); return REQUIRE_ARGS; }
+"乃行是術曰"|"乃是術曰" { lexerLog("FUNC_BEGIN %s\n", yytext); return FUNC_BEGIN; }
+"是謂"   { lexerLog("FUNC_END_FOR %s\n", yytext); return FUNC_END_FOR; }
+"之術也" { lexerLog("FUNC_END %s\n", yytext); return FUNC_END; }
+"施"     { lexerLog("CALL %s\n", yytext); return CALL; }
+"以施"   { lexerLog("TO_CALL %s\n", yytext); return TO_CALL; }
+"之長"   { lexerLog("LENGTH %s\n", yytext); return LENGTH; }
+"之"     { lexerLog("INDEX %s\n", yytext); return INDEX; }
+"充"     { lexerLog("PUSH %s\n", yytext); return PUSH; }
+"書之"   { lexerLog("PRINT %s\n", yytext); return PRINT; }
+"夫"     { lexerLog("THOSE %s\n", yytext); return THOSE; }
+"取"     { lexerLog("TAKE %s\n", yytext); return TAKE; }
+
+ /* ── 數字（含小數 digit·digit）── 透過 chineseToArabic 解析中文數字 ── */
+{digit}+"\xC2\xB7"{digit}+ { chineseToArabic(yytext, &yylval.n_var); lexerLog("NUMBER_LIT %g\n", sciToDouble(&yylval.n_var)); return NUMBER_LIT; }
+{digit}+ { chineseToArabic(yytext, &yylval.n_var); lexerLog("NUMBER_LIT %lld\n", (long long)sciToInt32(&yylval.n_var)); return NUMBER_LIT; }
+
+ /* ── 標點（句讀），忽略 ── */
+"。"|"，"|"、" {}
 
 [ \t]+      {}
 \r?\n       { updateNewline(); }

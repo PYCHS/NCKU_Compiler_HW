@@ -4,6 +4,7 @@
 
 #include "scope.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -117,14 +118,29 @@ void scope_push_typed(ScopeType type, const void* data) {
 
 // cloneStruct / map_putpp / strdup 用法：見 README.md §工具函式速查
 SymbolData* scope_addSymbol(const ObjectType type, char* name) {
-    const SymbolData symbol = {.type = type, .name = strdup(name), .index = ctx->variableCount++};
+    /* 先掃過當前 context 的所有 scope，若已有同名符號則拒絕重複宣告 */
+    linkedList_foreach(&ctx->scopeStack, node) {
+        ScopeData* scopeData = node->value;
+        if (map_get(&scopeData->symbolMap, name)) {
+            yyerrorf("「%s」已嘗立名，不可復立\n", name);
+            return NULL;
+        }
+    }
+
+    const SymbolData symbol = {
+        .type = type,
+        .elementType = OBJECT_TYPE_UNDEFINED,
+        .name = strdup(name),
+        .index = ctx->variableCount++,
+        .funcInfo = NULL,
+        .funcArg = false,
+    };
     SymbolData* symbolData = cloneStruct(SymbolData, &symbol);
     if (!symbolData)
         exit(EXIT_FAILURE);
 
-    ScopeData* _currentScope = ctx->scopeStack.head->prev->value;
-    map_putpp(&_currentScope->symbolMap, strdup(name), symbolData);
-    // TODO: 插入前先查所有 scope 是否已存在同名符號，重複時回傳 NULL
+    ScopeData* currentScope = ctx->scopeStack.head->prev->value;
+    map_putpp(&currentScope->symbolMap, strdup(name), symbolData);
     return symbolData;
 }
 
@@ -294,11 +310,9 @@ Object scope_findSymbol(char* name) {
             SymbolData* symbol = map_get(&scopeData->symbolMap, name);
             if (!symbol) continue;
 
-            // TODO: 若 searchCtx == ctx，表示符號在當前 context 內
-            //   回傳一個 capturedIndex = -1 的 SYMBOL Object（參考閉包分支的回傳格式）
+            // 符號就在當前 context（非閉包捕獲），直接回傳區域 SYMBOL（capturedIndex = -1）
             if (searchCtx == ctx) {
-                /* 填空 */
-                return (Object){OBJECT_TYPE_UNDEFINED};
+                return (Object){OBJECT_TYPE_SYMBOL, .capturedIndex = -1, .value.symbol = symbol};
             }
 
             // Found in an outer function, propagate capture layer by layer.
